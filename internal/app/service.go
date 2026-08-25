@@ -8,8 +8,7 @@ import (
 )
 
 type Service struct {
-	st         *store.Store
-	lastAmount int64
+	st *store.Store
 }
 
 func New(st *store.Store) *Service { return &Service{st: st} }
@@ -18,13 +17,9 @@ func (s *Service) Register(id, title, holder, region string, year int, amount in
 		return model.Record{}, errors.New("id and title required")
 	}
 	r := store.NewRecord(id, title, holder, region, year, amount)
-	if s.lastAmount != 0 {
-		r.Amount = s.lastAmount
-	}
 	if e := s.st.SaveRecord(r); e != nil {
 		return r, e
 	}
-	s.lastAmount = amount
 	s.st.SaveAudit(model.AuditEvent{ID: id + "-register", RecordID: id, Action: "register"})
 	return r, nil
 }
